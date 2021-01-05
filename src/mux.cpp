@@ -6,29 +6,35 @@
 #include "turtlesim/Pose.h"
 #include "safe_turtles/Timeout.h"
 
-ros::NodeHandle* nodePtr;
+bool cmd_mode;
 ros::Publisher pub;
-ros::Subscriber cmd_sub;
 ros::Timer safeTimer;
 
 bool timeout(safe_turtles::Timeout::Request  &req,
              safe_turtles::Timeout::Response &resp)
 {
     ROS_INFO("Safe Mode");
-    cmd_sub.shutdown();
+    cmd_mode = false;
     safeTimer.setPeriod(req.time);
     safeTimer.start();
     return true;
 }
 
-void redirect(const geometry_msgs::Twist::ConstPtr& vel)
+void safe_redirect(const geometry_msgs::Twist::ConstPtr& vel)
 {
     pub.publish(vel);
 }
 
+void cmd_redirect(const geometry_msgs::Twist::ConstPtr& vel)
+{
+    if(cmd_mode){
+        pub.publish(vel);
+    }
+}
+
 void cmdMode(const ros::TimerEvent& te)
 {
-    cmd_sub  = nodePtr->subscribe("cmd_input",1,redirect);
+    cmd_mode = true;
     ROS_INFO("Normal mode");
 }
 
@@ -36,10 +42,9 @@ int main(int argc, char** argv)
 {
     ros::init(argc,argv, "mux");
     ros::NodeHandle n;
-    nodePtr = &n;
     safeTimer = n.createTimer(ros::Duration(1), cmdMode, true, false);
-    cmd_sub  = n.subscribe("cmd_input",1,redirect);
-    ros::Subscriber safe_sub = n.subscribe("safe_input", 1000, redirect);
+    ros::Subscriber cmd_sub  = n.subscribe("cmd_input",1,safe_redirect);
+    ros::Subscriber safe_sub = n.subscribe("safe_input", 1000, cmd_redirect);
 
     ros::ServiceServer service = n.advertiseService("timeout", timeout);
     
