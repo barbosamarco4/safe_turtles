@@ -5,8 +5,6 @@
 #include "turtlesim/Pose.h"
 #include "safe_turtles/Timeout.h"
 
-ros::Publisher pub;
-ros::ServiceClient client;
 
 bool returning = false;
 
@@ -62,12 +60,19 @@ int main(int argc, char** argv){
     ros::init(argc,argv, "safety_controller");
     ros::NodeHandle n;
 
-    ros::Subscriber sub = n.subscribe("input", 1000, returnToSafety);
+    ros::Subscriber sub = n.subscribe("input", 1, returnToSafety);
 
-    pub = n.advertise<geometry_msgs::Twist>("output",1000);
-    client = n.serviceClient<safe_turtles::Timeout>("timeout");
+    ros::Publisher pub = n.advertise<geometry_msgs::Twist>("output",1000);
+    ros::ServiceClient client = n.serviceClient<safe_turtles::Timeout>("timeout");
     
-    ros::spin();
+    ros::Rate pub_rate(10);
 
+    while(ros::ok()){
+	    if(fora){
+	        returnToSafety();
+	    }
+	    ros::spinOnce();
+	    pub_rate.sleep();
+    }
     return 0;
 }
