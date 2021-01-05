@@ -1,0 +1,5 @@
+<launch>
+    <node launch-prefix="gdb -ex run --args" pkg="safe_turles" name="muxer" type="mux">
+        <remap from="output" to="/turtle1/cmd_vel"/>
+    </node> 
+</launch>
