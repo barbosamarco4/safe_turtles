@@ -13,8 +13,8 @@ ros::Timer safeTimer;
 bool timeout(safe_turtles::Timeout::Request  &req,
              safe_turtles::Timeout::Response &resp)
 {
-    ROS_INFO("Safe Mode");
     cmd_mode = false;
+    ROS_INFO("Safe Mode");
     safeTimer.setPeriod(req.time);
     safeTimer.start();
     return true;
@@ -43,12 +43,14 @@ int main(int argc, char** argv)
     ros::init(argc,argv, "mux");
     ros::NodeHandle n;
     safeTimer = n.createTimer(ros::Duration(1), cmdMode, true, false);
-    ros::Subscriber cmd_sub  = n.subscribe("cmd_input",1,safe_redirect);
-    ros::Subscriber safe_sub = n.subscribe("safe_input", 1000, cmd_redirect);
+    ros::Subscriber cmd_sub  = n.subscribe("cmd_input",1,cmd_redirect);
+    ros::Subscriber safe_sub = n.subscribe("safe_input", 1000, safe_redirect);
 
     ros::ServiceServer service = n.advertiseService("timeout", timeout);
     
     pub = n.advertise<geometry_msgs::Twist>("output",1000);
+    
+    cmd_mode=true;
     ROS_INFO("Setup complete. Starting to pump callbacks");
 
     ros::spin();
