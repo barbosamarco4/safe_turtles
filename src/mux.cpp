@@ -10,8 +10,8 @@ bool cmd_mode;
 ros::Publisher pub;
 ros::Timer safeTimer;
 
-bool timeout(safe_turtles::Timeout::Request  &req,
-             safe_turtles::Timeout::Response &resp)
+bool timeout(safe_turtles::Timeout::Request &req, 
+	     safe_turtles::Timeout::Response &resp)
 {
     cmd_mode = false;
     ROS_INFO("Safe Mode");
