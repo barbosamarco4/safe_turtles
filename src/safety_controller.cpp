@@ -57,7 +57,7 @@ void toSafety(ros::Publisher& pub)
         vel = nextPos(theta,pose.theta,dist);
         pub.publish(vel);
     }
-    else if (dist <= min_r,2 && returning) {
+    else if (dist <= min_r && returning) {
         returning = false;
     }
     ROS_INFO("The turtle is at (%f,%f), with a rotation of: %f",pose.x,pose.y, pose.theta);
